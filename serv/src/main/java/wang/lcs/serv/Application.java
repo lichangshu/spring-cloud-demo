@@ -15,6 +15,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
@@ -22,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableEurekaClient
+@EnableWebSecurity
 @Configuration
 public class Application extends SpringBootServletInitializer {
 
@@ -55,5 +60,15 @@ public class Application extends SpringBootServletInitializer {
                 }, responseExtractor);
             }
         };
+    }
+
+    @Component
+    public class WebSecurity extends WebSecurityConfigurerAdapter {
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http//
+                    .antMatcher("/rpc/**").authorizeRequests().anyRequest().authenticated()// /rpc/** httpBasic authorize
+                    .and().csrf().disable().httpBasic();
+        }
     }
 }

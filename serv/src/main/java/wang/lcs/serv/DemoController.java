@@ -9,15 +9,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 @Controller
-public class AuthController {
+public class DemoController {
 
     @Resource
-    RestTemplate rest;
-
-    @RequestMapping("/login")
-    public String login() {
-        return "/login";
-    }
+    RestTemplate restTemplate;
 
     @Value("${server.port}")
     private int port;
@@ -25,15 +20,15 @@ public class AuthController {
     @Value("${spring.cloud.client.ipAddress}")
     private String ipadd;
 
-    @RequestMapping(value = { "/", "/index", "/index.html" })
+    @RequestMapping(value = { "/", "/index", "/index.html", "/rpc/index.html" })
     @ResponseBody
     public String index() {
-        return "reqest index in [" + ipadd + "]:" + port;
+        return String.format("request index in %s:%s", ipadd, port);
     }
 
     @RequestMapping("/curl")
     @ResponseBody
-    public String loginOk() {
-        return rest.getForObject("http://ICO-DEMO/index.html", String.class);
+    public String curl() {
+        return restTemplate.getForObject("http://serv/index.html", String.class);
     }
 }

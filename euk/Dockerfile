@@ -1,7 +1,7 @@
 FROM openjdk:8
 VOLUME /tmp
 
-ADD target/euk-0.0.1-SNAPSHOT.jar /opt/app.jar
+ADD target/demo-cloud-euk-0.0.1-SNAPSHOT.jar /opt/app.jar
 
 WORKDIR /opt/
 

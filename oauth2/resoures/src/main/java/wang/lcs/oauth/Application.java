@@ -1,4 +1,4 @@
-package wang.lcs.serv;
+package wang.lcs.oauth;
 
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -18,7 +18,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.stereotype.Component;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
@@ -26,9 +27,11 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableEurekaClient
-@EnableWebSecurity
+@EnableResourceServer
 @Configuration
 public class Application extends SpringBootServletInitializer {
+
+    public String SPARKLR_RESOURCE_ID = "app";
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
@@ -63,13 +66,26 @@ public class Application extends SpringBootServletInitializer {
         };
     }
 
-    @Component
-    public class WebSecurity extends WebSecurityConfigurerAdapter {
+    @Configuration
+    @EnableWebSecurity
+    public static class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http//
-                    .antMatcher("/rpc/**").authorizeRequests().anyRequest().authenticated()// /rpc/** httpBasic authorize
-                    .and().csrf().disable().httpBasic();
+            http.antMatcher("/rpc/**").authorizeRequests()//
+                    .anyRequest().authenticated()//
+                    .and().httpBasic()//
+                    .and().csrf().disable();
         }
+    }
+
+    @Configuration
+    public static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.antMatcher("/i/**").authorizeRequests()//
+                    .antMatchers("/i/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))");
+        }
+
     }
 }

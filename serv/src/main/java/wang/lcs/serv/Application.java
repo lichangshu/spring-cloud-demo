@@ -42,6 +42,7 @@ public class Application extends SpringBootServletInitializer {
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate() {
+        // 支持 http://username:password@demo.com/foo/ 的格式
         return new RestTemplate() {
             @Override
             protected <T> T doExecute(URI url, HttpMethod method, RequestCallback requestCallback, ResponseExtractor<T> responseExtractor) throws RestClientException {

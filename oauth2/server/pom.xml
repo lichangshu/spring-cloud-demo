@@ -13,7 +13,7 @@
         <groupId>wang.lcs</groupId>
         <artifactId>spring-boot-base-parents</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../</relativePath>
+        <relativePath>../../</relativePath>
     </parent>
 
     <dependencies>

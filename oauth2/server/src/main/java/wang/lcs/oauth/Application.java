@@ -14,6 +14,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -74,18 +75,33 @@ public class Application extends SpringBootServletInitializer {
     }
 
     @Configuration
-    @EnableWebSecurity
-    public static class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
+    @Order(99)
+    public static class OAuth2Security extends WebSecurityConfigurerAdapter {// httpBasic
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.csrf().disable();
-            http//
+            http.csrf().disable()//
+                    .antMatcher("/rpc/**").authorizeRequests().anyRequest().authenticated()//
+                    .and().httpBasic();//
+        }
+
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.inMemoryAuthentication().withUser("rpc-user").password("password").roles("client");
+        }
+    }
+
+    @Configuration
+    @EnableWebSecurity
+    public static class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {// Login user
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.csrf().disable()//
                     .requestMatchers().antMatchers("/oauth/**", "/login/**", "/logout/**")//
                     .and()//
                     .authorizeRequests()//
-                    .antMatchers("/oauth/**").authenticated()//
-                    .and()//
+                    .antMatchers("/oauth/**").hasAnyRole("USER").and()//
                     .formLogin().permitAll();
         }
 
@@ -102,12 +118,12 @@ public class Application extends SpringBootServletInitializer {
 
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-            auth.inMemoryAuthentication().withUser("hello").password("hello").roles("ADMIN");
+            auth.inMemoryAuthentication().withUser("demo-user").password("password").roles("USER");
         }
     }
 
     @Component
-    public static class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
+    public static class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {//oauth2
         @Autowired
         private TokenStore tokenStore;
         @Autowired
@@ -119,8 +135,8 @@ public class Application extends SpringBootServletInitializer {
 
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-            clients.inMemory().withClient("client").secret("password")//
-                    .authorizedGrantTypes("authorization_code").scopes("app");
+            clients.inMemory().withClient("demo-client").secret("password")//
+                    .authorizedGrantTypes("authorization_code", "token", "code", "password").scopes("read", "write").resourceIds("demo-resources");
         }
 
         @Override

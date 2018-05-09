@@ -1,6 +1,7 @@
 package wang.lcs.oauth;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.Charset;
@@ -40,7 +41,7 @@ public class ApplicationTest {
 
     @Test
     public void testIndex() throws Exception {
-        mockMvc.perform(get("/")).andExpect(status().isOk());
+        mockMvc.perform(get("/")).andExpect(status().isOk()).andDo(print());
     }
 
     @Test

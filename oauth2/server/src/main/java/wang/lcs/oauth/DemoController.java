@@ -1,14 +1,14 @@
 package wang.lcs.oauth;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-@Controller
+@RestController
 public class DemoController {
 
     @Resource
@@ -20,15 +20,14 @@ public class DemoController {
     @Value("${spring.cloud.client.ipAddress}")
     private String ipadd;
 
-    @RequestMapping(value = { "/", "/index", "/index.html", "/rpc/index.html" })
-    @ResponseBody
+    @RequestMapping(value = { "/", "/index", "/index.html" })
     public String index() {
-        return String.format("request index in %s:%s", ipadd, port);
+        return "request index in [" + ipadd + "]:" + port;
     }
 
-    @RequestMapping("/curl")
-    @ResponseBody
-    public String curl() {
-        return restTemplate.getForObject("http://serv/index.html", String.class);
+    @RequestMapping(value = { "/i/info.html", "/rpc/info.html" })
+    public String curl(HttpServletRequest request) {
+        return "Your request uri : " + request.getRequestURI();
     }
+
 }

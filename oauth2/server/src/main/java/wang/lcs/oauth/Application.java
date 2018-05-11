@@ -98,11 +98,10 @@ public class Application extends SpringBootServletInitializer {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.csrf().disable()//
-                    .requestMatchers().antMatchers("/oauth/**", "/login/**", "/logout/**")//
+                    .requestMatchers().antMatchers("/login/**", "/logout/**")//
                     .and()//
-                    .authorizeRequests()//
-                    .antMatchers("/oauth/**").hasAnyRole("USER").and()//
-                    .formLogin().permitAll();
+                    .authorizeRequests().anyRequest().authenticated()//
+                    .and().formLogin().permitAll();
         }
 
         @Bean
@@ -123,7 +122,7 @@ public class Application extends SpringBootServletInitializer {
     }
 
     @Component
-    public static class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {//oauth2
+    public static class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {// oauth2
         @Autowired
         private TokenStore tokenStore;
         @Autowired
@@ -131,12 +130,14 @@ public class Application extends SpringBootServletInitializer {
 
         @Override
         public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+            security.checkTokenAccess("isAuthenticated()"); 
         }
 
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
             clients.inMemory().withClient("demo-client").secret("password")//
-                    .authorizedGrantTypes("authorization_code", "token", "code", "password").scopes("read", "write").resourceIds("demo-resources");
+                    .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")//
+                    .scopes("read", "write", "trust").resourceIds("demo-resources");
         }
 
         @Override

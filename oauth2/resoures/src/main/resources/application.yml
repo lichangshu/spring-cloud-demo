@@ -2,7 +2,7 @@
 #
 ########
 server:
-  port: 8081
+  port: 8082
 
 #
 spring:
@@ -13,19 +13,20 @@ security:
   user:
     password: password
   oauth2:
+    host: http://oauth-server
     resource:
-      user-info-uri: http://localhost:8080/i/info.html
+      service-id: demo-resources
+      token-info-uri: ${security.oauth2.host}/oauth/check_token
+#      user-info-uri: ${security.oauth2.host}/i/info.html
     client:
-      resource-ids: app
-      user-authorization-uri: http://localhost:8080/oauth/authorize
-      access-token-uri: http://localhost:8080/oauth/token
-      client-id: client
+      access-token-uri: ${security.oauth2.host}/oauth/token
+      client-id: demo-client
       client-secret: password
 #
 eureka:
   client:
     service-url:
-      defaultZone: http://192.168.1.18:8761/eureka/
+      defaultZone: http://192.168.1.246:8761/eureka/
   instance:
 #    ip-address: 192.168.1.220
     prefer-ip-address: true

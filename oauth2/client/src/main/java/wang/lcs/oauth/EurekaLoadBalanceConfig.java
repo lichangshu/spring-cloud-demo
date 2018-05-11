@@ -56,14 +56,7 @@ public class EurekaLoadBalanceConfig {
         return remoteTokenServices;
     }
 
-    /**
-     * Oauth2 修改为 ribbon 负载均衡
-     * 
-     * @param oauth2ClientContext
-     * @param resource
-     * @param loadBalance
-     * @return
-     */
+    //ApplicationListener Event listener
     @Bean
     public ApplicationListener<ApplicationReadyEvent> oauth2RestTemplateUpdateAccessTokenProvider() {
         return (ApplicationReadyEvent e) -> {

@@ -8,16 +8,19 @@ import java.util.List;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.web.client.RequestCallback;
@@ -26,12 +29,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-@EnableEurekaClient
 @EnableResourceServer
-@Configuration
+@EnableEurekaClient
+@EnableWebSecurity
 public class Application extends SpringBootServletInitializer {
-
-    public String SPARKLR_RESOURCE_ID = "app";
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
@@ -43,7 +44,14 @@ public class Application extends SpringBootServletInitializer {
     }
 
     @Bean
+    @ConfigurationProperties(prefix = "security.oauth2.client")
+    public ResourceOwnerPasswordResourceDetails resourceOwnerPasswordResourceDetails() {
+        return new ResourceOwnerPasswordResourceDetails();
+    }
+
+    @Bean
     @LoadBalanced
+    @Primary
     public RestTemplate restTemplate() {
         // 支持 http://username:password@demo.com/foo/ 的格式
         return new RestTemplate() {
@@ -68,7 +76,7 @@ public class Application extends SpringBootServletInitializer {
 
     @Configuration
     @EnableWebSecurity
-    public static class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
+    public static class HttpBasicSecurityConfiguration extends WebSecurityConfigurerAdapter {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/rpc/**").authorizeRequests()//
@@ -83,7 +91,9 @@ public class Application extends SpringBootServletInitializer {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
-            http.antMatcher("/i/**").authorizeRequests()//
+            http
+                    // .formLogin().and()
+                    .authorizeRequests()//
                     .antMatchers("/i/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))");
         }
 

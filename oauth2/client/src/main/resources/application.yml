@@ -1,0 +1,34 @@
+########
+#
+########
+server:
+  port: 8081
+
+#
+spring:
+  application:
+    name: oauth-client
+#
+security:
+  user:
+    name: oauth-client
+    password: password
+  oauth2:
+    host: http://oauth-server
+    resource:
+      user-info-uri: ${security.oauth2.host}/i/info.html
+    client:
+      client-id: demo-client
+      client-secret: password
+      access-token-uri: ${security.oauth2.host}/oauth/token
+      user-authorization-uri: ${security.oauth2.host}/oauth/authorize
+#
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port:8080}
+
+#

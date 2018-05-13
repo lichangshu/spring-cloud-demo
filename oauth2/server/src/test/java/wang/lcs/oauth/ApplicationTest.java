@@ -1,5 +1,6 @@
 package wang.lcs.oauth;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -46,11 +47,11 @@ public class ApplicationTest {
 
     @Test
     public void testRpc() throws Exception {
-        mockMvc.perform(get("/rpc/index.html"))//
+        mockMvc.perform(get("/rpc/info.html"))//
                 .andExpect(status().is(401));
 
         String encode = Base64.getEncoder().encodeToString("rpc-user:password".getBytes(Charset.forName("US-ASCII")));
-        mockMvc.perform(get("/rpc/index.html").header("Authorization", "Basic " + encode))//
+        mockMvc.perform(get("/rpc/info.html").header("Authorization", "Basic " + encode))//
                 .andExpect(status().isOk());
     }
 
@@ -62,10 +63,15 @@ public class ApplicationTest {
                 .andExpect(header().stringValues("Location", "http://localhost/login"));
 
         mockMvc.perform(post("/login?username={0}&password={1}", "demo-user", "password").session(session))//
-                .andExpect(status().is(302));
+                .andExpect(status().is(302))//
+                .andExpect(header().stringValues("Location", "/"));
 
         String encode = Base64.getEncoder().encodeToString("demo-client:password".getBytes(Charset.forName("US-ASCII")));
         mockMvc.perform(get(req).header("Authorization", "Basic " + encode).session(session))//
                 .andExpect(status().isOk());
+
+        mockMvc.perform(get("/oauth/check_token?token={0}", "test").header("Authorization", "Basic " + encode))//
+                .andExpect(status().is(400))//
+                .andExpect(content().string(containsString("invalid_token")));
     }
 }

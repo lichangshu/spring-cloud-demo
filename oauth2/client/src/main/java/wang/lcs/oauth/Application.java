@@ -14,7 +14,6 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -25,6 +24,7 @@ import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
@@ -33,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableEurekaClient
+@EnableResourceServer
 @EnableOAuth2Client
 @EnableWebSecurity
 @Configuration
@@ -48,6 +49,7 @@ public class Application extends SpringBootServletInitializer {
     }
 
     @Bean
+    @LoadBalanced
     public OAuth2RestTemplate oauth2RestTemplate(OAuth2ClientContext oauth2ClientContext, ResourceOwnerPasswordResourceDetails resource) {
         return new OAuth2RestTemplate(resource, oauth2ClientContext);
     }
@@ -60,7 +62,6 @@ public class Application extends SpringBootServletInitializer {
 
     @Bean
     @LoadBalanced
-    @Primary
     public RestTemplate restTemplate() {
         // 支持 http://username:password@demo.com/foo/ 的格式
         return new RestTemplate() {
@@ -87,9 +88,10 @@ public class Application extends SpringBootServletInitializer {
     public static class HttpBasicSecurityConfiguration extends WebSecurityConfigurerAdapter {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.httpBasic().and().csrf().disable()//
+            http.csrf().disable()//
                     .requestMatchers().antMatchers("/rpc/**").and()//
-                    .authorizeRequests().antMatchers("/rpc/**").authenticated();
+                    .authorizeRequests().antMatchers("/rpc/**").authenticated()//
+                    .and().httpBasic();
         }
     }
 

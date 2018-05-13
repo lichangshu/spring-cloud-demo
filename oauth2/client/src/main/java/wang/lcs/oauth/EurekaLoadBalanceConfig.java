@@ -50,23 +50,23 @@ public class EurekaLoadBalanceConfig {
      * @return
      */
     @Bean
-    public RemoteTokenServices remoteTokenServicesUpdateRestTemplate(@Qualifier("tokenLoadBalance") RestTemplate tokenLoadBalance) {
-        RemoteTokenServices remoteTokenServices = new RemoteTokenServices();
-        remoteTokenServices.setRestTemplate(tokenLoadBalance);
-        return remoteTokenServices;
+    public ApplicationListener<ApplicationReadyEvent> remoteTokenServicesUpdateRestTemplate(//
+            RemoteTokenServices remoteTokenServices, @Qualifier("tokenLoadBalance") RestTemplate tokenLoadBalance) {
+        return (ApplicationReadyEvent e) -> {
+            remoteTokenServices.setRestTemplate(tokenLoadBalance);
+        };
     }
 
-    //ApplicationListener Event listener
+    // ApplicationListener Event listener
     @Bean
-    public ApplicationListener<ApplicationReadyEvent> oauth2RestTemplateUpdateAccessTokenProvider() {
+    public ApplicationListener<ApplicationReadyEvent> oauth2RestTemplateUpdateAccessTokenProvider(//
+            OAuth2RestTemplate oAuth2RestTemplate, @Qualifier RestTemplate restTemplate) {
         return (ApplicationReadyEvent e) -> {
-            OAuth2RestTemplate oauth = e.getApplicationContext().getBean(OAuth2RestTemplate.class);
-            RestTemplate loadBalance = e.getApplicationContext().getBean(RestTemplate.class);
-            oauth.setAccessTokenProvider(new ResourceOwnerPasswordAccessTokenProvider() {
+            oAuth2RestTemplate.setAccessTokenProvider(new ResourceOwnerPasswordAccessTokenProvider() {
                 @Override
                 protected RestOperations getRestTemplate() {
-                    setMessageConverters(loadBalance.getMessageConverters());
-                    return loadBalance;
+                    setMessageConverters(restTemplate.getMessageConverters());
+                    return restTemplate;
                 }
             });
         };

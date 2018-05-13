@@ -7,14 +7,16 @@ server:
 #
 spring:
   application:
-    name: oauth-client
+    name: OAUTH-CLIENT
 #
 security:
   user:
     name: oauth-client
     password: password
   oauth2:
-    host: http://oauth-server
+    resource:
+      token-info-uri: ${security.oauth2.host}/oauth/check_token
+    host: http://OAUTH-SERVER
     client:
       client-id: demo-client
       client-secret: password
@@ -24,7 +26,7 @@ security:
 eureka:
   client:
     service-url:
-      defaultZone: http://192.168.1.246:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ipAddress}:${server.port:8080}

@@ -6,7 +6,7 @@ server:
 #
 spring:
   application:
-    name: oauth-server
+    name: OAUTH-SERVER
   profiles:
     active:
     - dev
@@ -15,7 +15,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://192.168.1.246:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
   instance:
 #    ip-address: 192.168.1.220
     prefer-ip-address: true

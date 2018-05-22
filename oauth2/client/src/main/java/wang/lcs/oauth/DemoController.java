@@ -1,12 +1,13 @@
 package wang.lcs.oauth;
 
+import java.util.Collections;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +40,11 @@ public class DemoController {
 
     @RequestMapping(value = { "/login" })
     public OAuth2AccessToken getAccessToken(String username, String password) {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(username, password));
+        auth2RestTemplate.getOAuth2ClientContext().setAccessToken(null);
+        AccessTokenRequest tokenRequest = auth2RestTemplate.getOAuth2ClientContext().getAccessTokenRequest();
+        tokenRequest.put("username", Collections.singletonList(username));
+        tokenRequest.put("password", Collections.singletonList(password));
+
         auth2RestTemplate.getOAuth2ClientContext().setAccessToken(null);
         try {
             return auth2RestTemplate.getAccessToken();
